@@ -17,11 +17,7 @@
         - "python36"
         - "python36-devel"
 
-    - name: Install MySQL community repository
-      yum:
-        name: "http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm"
-        state: present
-
+   
     - name: Install MySQL database
       yum:
         name: "{{ item }}"
@@ -46,16 +42,16 @@
 
     - name: Install mysql-python package
       yum:
-        name: MySQL-python
+        name: python3-mysql
         state: present
 
     - name: Install pip
       yum:
-        name: "python-pip"
+        name: "python3-pip"
         state: present
 
     - name: Install required Python libraries
-      pip:
+      pip3:
         name: "{{ item }}"
         state: present
       with_items:
