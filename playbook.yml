@@ -1,5 +1,7 @@
 - name: Deploy a web application
   hosts: db_and_web_server
+  become: true
+  become_user: root
   tasks:
     - name: Install EPEL repo from repository
       yum:
