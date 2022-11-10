@@ -1,16 +1,17 @@
 - name: Deploy a web application
-  hosts: db_and_web_server
-  become: true
+  hosts: all
+  become: True
   become_user: root
   tasks:
     - name: Install EPEL repo from repository
       yum:
         name: "http://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
         state: present
+        disable_gpg_check: True
       when:
-      - ansible_distribution == "RedHat"
-      - ansible_distribution_major_version == "8"
-  
+       - ansible_distribution == "RedHat"
+       - ansible_distribution_major_version == "8"
+
     - name: Install all required dependencies
       yum:
         name: "{{ item }}"
@@ -19,7 +20,7 @@
         - "python36"
         - "python36-devel"
 
-   
+
     - name: Install MySQL database
       yum:
         name: "{{ item }}"
@@ -36,6 +37,14 @@
           password="@targ8et"
         dest: "/etc/.my.cnf"
 
+    - name: MySQL bind configuration
+      blockinfile:
+        state: present
+        insertafter: EOF
+        dest: /etc/my.cnf.d/mysql-server.cnf
+        content: |
+          bind-address=0.0.0.0
+
     - name: Start MySQL Service
       service:
         name: mysqld
@@ -49,11 +58,11 @@
 
     - name: Install pip
       yum:
-        name: "python3-pip"
+        name: python3-pip
         state: present
 
     - name: Install required Python libraries
-      pip3:
+      pip:
         name: "{{ item }}"
         state: present
       with_items:
@@ -69,7 +78,7 @@
       mysql_user:
         name: db_user
         password: Passw0rd
-        priv: '*.*:ALL'
+        priv: '*.*:ALL,GRANT'
         state: present
 
     - name: Copy source code
@@ -78,4 +87,4 @@
         dest: /opt/app.py
 
     - name: Start web server
-      shell: FLASK_APP=/opt/app.py nohup flask run --host=0.0.0.0 &
+      shell: FLASK_APP=/opt/app.py nohup /usr/local/bin/flask run --host=0.0.0.0&
